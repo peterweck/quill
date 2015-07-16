@@ -29,7 +29,7 @@ class SnowTheme extends BaseTheme
     dom(@quill.container).addClass('ql-snow')
     @pickers = []
     @quill.on(@quill.constructor.events.SELECTION_CHANGE, (range) =>
-      _.invoke(@pickers, 'close') if range?
+      _.invoke(@pickers, 'close') if range? and @quill.active
     )
     @quill.onModuleLoad('multi-cursor', _.bind(this.extendMultiCursor, this))
     @quill.onModuleLoad('toolbar', _.bind(this.extendToolbar, this))
@@ -42,24 +42,28 @@ class SnowTheme extends BaseTheme
     )
 
   extendToolbar: (module) ->
-    dom(module.container).addClass('ql-snow')
-    _.each(['color', 'background', 'font', 'size', 'align'], (format) =>
-      select = module.container.querySelector(".ql-#{format}")
-      return unless select?
-      switch format
-        when 'font', 'size', 'align'
-          picker = new Picker(select)
-        when 'color', 'background'
-          picker = new ColorPicker(select)
-          _.each(picker.container.querySelectorAll('.ql-picker-item'), (item, i) ->
-            dom(item).addClass('ql-primary-color') if i < 7
-          )
-      @pickers.push(picker) if picker?
-    )
-    _.each(dom(module.container).textNodes(), (node) ->
-      if dom(node).text().trim().length == 0
-        dom(node).remove()
-    )
+    if module.container.pickers?
+      @pickers = module.container.pickers  # The pickers have already been stored with this dom element so it's been initialized
+    else
+      dom(module.container).addClass('ql-snow')
+      _.each(['color', 'background', 'font', 'size', 'align'], (format) =>
+        select = module.container.querySelector(".ql-#{format}")
+        return unless select?
+        switch format
+          when 'font', 'size', 'align'
+            picker = new Picker(select)
+          when 'color', 'background'
+            picker = new ColorPicker(select)
+            _.each(picker.container.querySelectorAll('.ql-picker-item'), (item, i) ->
+              dom(item).addClass('ql-primary-color') if i < 7
+            )
+        @pickers.push(picker) if picker?
+      )
+      module.container.pickers = @pickers;  # Store the pickers in the dom node so it can be shared between editors
+      _.each(dom(module.container).textNodes(), (node) ->
+        if dom(node).text().trim().length == 0
+          dom(node).remove()
+      )
 
 
 module.exports = SnowTheme
