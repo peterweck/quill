@@ -51,6 +51,7 @@ class Toolbar
     return unless input?
     @inputs[format] = input
     dom(input).on(eventName, =>
+      return unless @quill.active
       value = if eventName == 'change' then dom(input).value() else !dom(input).hasClass('ql-active')
       @preventUpdate = true
       @quill.focus()
@@ -80,6 +81,7 @@ class Toolbar
       $input.toggleClass('ql-active', value or false)
 
   updateActive: (range, formats = null) ->
+    return unless @quill.active
     range or= @quill.getSelection()
     return unless range? and !@preventUpdate
     activeFormats = this._getActive(range)

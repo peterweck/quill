@@ -17,6 +17,8 @@ class Quill extends EventEmitter2
   @modules: []
   @themes: []
 
+  @active: true  # Used for a shared toolbar to tell when to process events
+
   @DEFAULTS:
     formats: ['align', 'bold', 'italic', 'strike', 'underline', 'color', 'background', 'font', 'size', 'link', 'image', 'bullet', 'list']
     modules:
