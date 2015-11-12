@@ -29,6 +29,7 @@ class MultiCursor extends EventEmitter2
 
   moveCursor: (userId, index) ->
     cursor = @cursors[userId]
+    return unless cursor?
     cursor.index = index
     dom(cursor.elem).removeClass('hidden')
     clearTimeout(cursor.timer)
@@ -61,8 +62,12 @@ class MultiCursor extends EventEmitter2
 
   shiftCursors: (index, length, authorId = null) ->
     _.each(@cursors, (cursor, id) =>
-      return unless cursor and (cursor.index > index or cursor.userId == authorId)
-      cursor.index += Math.max(length, index - cursor.index)
+      return unless cursor
+      shift = Math.max(length, index - cursor.index)
+      if cursor.userId == authorId
+        this.moveCursor(authorId, cursor.index + shift)
+      else if cursor.index > index
+        cursor.index += shift
     )
 
   update: ->
@@ -102,6 +107,7 @@ class MultiCursor extends EventEmitter2
 
   _updateCursor: (cursor) ->
     bounds = @quill.getBounds(cursor.index)
+    return this.removeCursor(cursor.userId) unless bounds?
     cursor.elem.style.top = (bounds.top + @quill.container.scrollTop) + 'px'
     cursor.elem.style.left = bounds.left + 'px'
     cursor.elem.style.height = bounds.height + 'px'

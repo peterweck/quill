@@ -7,6 +7,7 @@ class UndoManager
   @DEFAULTS:
     delay: 1000
     maxStack: 100
+    userOnly: false
 
   @hotkeys:
     UNDO: { key: 'Z', metaKey: true }
@@ -25,15 +26,21 @@ class UndoManager
         this.undo()
         return false
       )
-      keyboard.addHotkey(UndoManager.hotkeys.REDO, =>
+      redoKey = [UndoManager.hotkeys.REDO]
+      if (navigator.platform.indexOf('Win') > -1)
+        redoKey.push({ key: 'Y', metaKey: true })
+      keyboard.addHotkey(redoKey, =>
         @quill.editor.checkUpdate()
         this.redo()
         return false
       )
     )
-    @quill.on(@quill.constructor.events.TEXT_CHANGE, (delta, origin) =>
+    @quill.on(@quill.constructor.events.TEXT_CHANGE, (delta, source) =>
       return if @ignoreChange
-      this.record(delta, @oldDelta)
+      if !@options.userOnly or source == Quill.sources.USER
+        this.record(delta, @oldDelta)
+      else
+        this._transform(delta)
       @oldDelta = @quill.getContents()
     )
 
@@ -90,12 +97,21 @@ class UndoManager
       change = @stack[source].pop()
       @lastRecorded = 0
       @ignoreChange = true
-      @quill.updateContents(change[source], 'user')
+      @quill.updateContents(change[source], Quill.sources.USER)
       @ignoreChange = false
       index = this._getLastChangeIndex(change[source])
       @quill.setSelection(index, index)
       @oldDelta = @quill.getContents()
       @stack[dest].push(change)
+
+  _transform: (delta) ->
+    @oldDelta = delta.transform(@oldDelta, true)
+    for change in @stack.undo
+      change.undo = delta.transform(change.undo, true)
+      change.redo = delta.transform(change.redo, true)
+    for change in @stack.redo
+      change.undo = delta.transform(change.undo, true)
+      change.redo = delta.transform(change.redo, true)
 
 
 Quill.registerModule('undo-manager', UndoManager)
