@@ -85,8 +85,10 @@ class Format
     return this.remove(node) unless value
     return node if this.value(node) == value
     if _.isString(@config.parentTag)
-      parentNode = document.createElement(@config.parentTag)
-      dom(node).wrap(parentNode)
+      parentNode = node.parentNode;
+      if parentNode.tagName != @config.parentTag
+          parentNode = document.createElement(@config.parentTag)
+          dom(node).wrap(parentNode)
       if node.parentNode.tagName == node.parentNode.previousSibling?.tagName
         dom(node.parentNode.previousSibling).merge(node.parentNode)
       if node.parentNode.tagName == node.parentNode.nextSibling?.tagName
@@ -97,7 +99,7 @@ class Format
         dom(node).replace(formatNode) if node.parentNode?
         node = formatNode
       else if this.isType(Format.types.LINE)
-        node = dom(node).switchTag(@config.tag)
+        node = dom(node).switchTag(@config.tag).get()
       else
         dom(node).wrap(formatNode)
         node = formatNode
@@ -158,12 +160,12 @@ class Format
         if _.isString(@config.parentTag)
           dom(node).splitBefore(node.parentNode.parentNode) if node.previousSibling?
           dom(node.nextSibling).splitBefore(node.parentNode.parentNode) if node.nextSibling?
-        node = dom(node).switchTag(dom.DEFAULT_BLOCK_TAG)
+        node = dom(node).switchTag(dom.DEFAULT_BLOCK_TAG).get()
       else if this.isType(Format.types.EMBED)
         dom(node).remove()
         return undefined
       else
-        node = dom(node).switchTag(dom.DEFAULT_INLINE_TAG)
+        node = dom(node).switchTag(dom.DEFAULT_INLINE_TAG).get()
     if _.isString(@config.parentTag)
       dom(node.parentNode).unwrap()
     if _.isFunction(@config.remove)
