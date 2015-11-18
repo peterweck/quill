@@ -16,8 +16,9 @@ class BaseTheme
 
   constructor: (@quill, @options) ->
     dom(@quill.container).addClass('ql-container')
-    if @options.styles
-      this.addStyles(baseStyles + BaseTheme.objToCss(@options.styles))
+    # Styles are included from the css that is already loaded in the editor
+#    if @options.styles
+#      this.addStyles(baseStyles + BaseTheme.objToCss(@options.styles))
     if dom.isIE(10)
       version = if dom.isIE(9) then '9' else '10'
       dom(@quill.root).addClass('ql-ie-' + version)
