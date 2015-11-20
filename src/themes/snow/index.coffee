@@ -46,8 +46,12 @@ class SnowTheme extends BaseTheme
       @pickers = module.container.pickers  # The pickers have already been stored with this dom element so it's been initialized
     else
       dom(module.container).addClass('ql-snow')
-      _.each(['color', 'background', 'font', 'size', 'align'], (format) =>
-        select = module.container.querySelector(".ql-#{format}")
+      _.each(['color', 'background', 'txt-background', 'font', 'size', 'align'], (format) =>
+        if format.indexOf('-') == -1
+          select = module.container.querySelector(".ql-#{format}")
+        else
+          select = module.container.querySelector(".#{format}")
+          format = format.replace(/^.*?\-/,'')
         return unless select?
         switch format
           when 'font', 'size', 'align'
