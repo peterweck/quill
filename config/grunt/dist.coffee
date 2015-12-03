@@ -24,6 +24,7 @@ module.exports = (grunt) ->
         browserifyOptions:
           extensions: ['.js', '.coffee']
           standalone: 'Quill'
+          debug: true
         transform: ['coffeeify', 'stylify', versionify]
         plugin: [derequire]
       files:
