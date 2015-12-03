@@ -168,7 +168,10 @@ class Selection
         nativeRange = document.createRange()
         nativeRange.setStart(startNode, startOffset)
         nativeRange.setEnd(endNode, endOffset)
-        selection.addRange(nativeRange)
+        # ignore IE errors that might occur
+        try
+          selection.addRange(nativeRange)
+        catch ignore
     else
       selection.removeAllRanges()
       @doc.root.blur()
